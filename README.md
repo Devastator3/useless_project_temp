@@ -1,26 +1,25 @@
 <img width="3188" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/517ad8e9-ad22-457d-9538-a9e62d137cd7" />
 
 
-# [Project Name] 🎯
+# [Leaf] 🎯
 
 
 ## Basic Details
-### Team Name: [Name]
+### Team Name: [Leaf]
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+- Team Lead: [Aalif Mohammad RS] - [CEAL]
+- Member 2: [Sidharth A] - [College]
 
 ### Project Description
-[2-3 lines about what your project does]
+[Track how many times the bell has rung during a bus journey]
 
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
+[To know when the bell rings]
 
 ### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
+[Using code]
 
 ## Technical Details
 ### Technologies/Components Used
