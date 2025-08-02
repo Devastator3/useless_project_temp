@@ -80,7 +80,7 @@ For Hardware:
 
 ### Project Demo
 # Video
-[[Add your demo video link here](https://github.com/Devastator3/useless_project_temp/blob/main/Screen%20Recording%202025-08-02%20162248.mp4)]
+[https://drive.google.com/file/d/1hotrpfA2V7nJkv4UuTE0JT_v-_ltOERv/view?usp=drive_link]
 *It shows the counter and the time stamp of when the bus is stopping as well as showing the status of the bus*
 
 # Additional Demos
