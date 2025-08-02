@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bell Clang Detection System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            opacity: 0.8;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .start-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+        
+        .stop-btn {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+        }
+        
+        .calibrate-btn {
+            background: linear-gradient(45deg, #ff9800, #e68900);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .status-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .detection-alert {
+            background: linear-gradient(45deg, #ff4757, #ff3742);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: pulse 1s infinite;
+            display: none;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .waveform-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        #waveform {
+            width: 100%;
+            height: 150px;
+            background: #1a1a1a;
+            border-radius: 10px;
+        }
+        
+        .explanation {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .explanation h3 {
+            color: #ffd700;
+            margin-top: 25px;
+            font-size: 1.3em;
+        }
+        
+        .explanation h3:first-child {
+            margin-top: 0;
+        }
+        
+        .code-snippet {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            border-left: 4px solid #ffd700;
+            overflow-x: auto;
+        }
+        
+        .threshold-control {
+            margin: 20px 0;
+        }
+        
+        .threshold-control input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            padding: 2px 0;
+        }
+        
+        .log-detection {
+            color: #ff4757;
+            font-weight: bold;
+        }
+        
+        .log-info {
+            color: #3742fa;
+        }
+        
+        .log-success {
+            color: #2ed573;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 Bell Clang Detection System</h1>
+        <p class="subtitle">Real-time audio analysis for bus bell detection using Web Audio API and machine learning concepts</p>
+        
+        <div class="detection-alert" id="detectionAlert">
+            🔔 BELL CLANG DETECTED! 🔔
+        </div>
+        
+        <div class="controls">
+            <button class="start-btn" id="startBtn">Start Detection</button>
+            <button class="stop-btn" id="stopBtn" disabled>Stop Detection</button>
+            <button class="calibrate-btn" id="calibrateBtn">Calibrate Background</button>
+        </div>
+        
+        <div class="status-panel">
+            <div class="status-card">
+                <div>System Status</div>
+                <div class="status-value" id="systemStatus">Ready</div>
+            </div>
+            <div class="status-card">
+                <div>Audio Level</div>
+                <div class="status-value" id="audioLevel">0 dB</div>
+            </div>
+            <div class="status-card">
+                <div>Bell Probability</div>
+                <div class="status-value" id="bellProbability">0%</div>
+            </div>
+            <div class="status-card">
+                <div>Detections</div>
+                <div class="status-value" id="detectionCount">0</div>
+            </div>
+        </div>
+        
+        <div class="threshold-control">
+            <label for="thresholdSlider">Detection Sensitivity:</label>
+            <input type="range" id="thresholdSlider" min="0.1" max="0.9" step="0.1" value="0.6">
+            <span id="thresholdValue">0.6</span>
+        </div>
+        
+        <div class="waveform-container">
+            <h3>Real-time Audio Waveform</h3>
+            <canvas id="waveform"></canvas>
+        </div>
+        
+        <div class="log" id="logContainer">
+            <div class="log-entry log-info">System initialized. Click "Start Detection" to begin.</div>
+        </div>
+        
+        <div class="explanation">
+            <h2>🧠 How Bell Clang Detection Works</h2>
+            
+            <h3>1. Audio Capture & Processing</h3>
+            <p>The system uses the Web Audio API to capture live audio from your microphone. The audio is processed in real-time using an AnalyserNode that provides frequency domain data.</p>
+            <div class="code-snippet">
+// Capture audio from microphone
+navigator.mediaDevices.getUserMedia({ audio: true })
+// Create audio analysis nodes
+const analyser = audioContext.createAnalyser();
+analyser.fftSize = 2048; // Frequency resolution
+            </div>
+            
+            <h3>2. Frequency Analysis (Fast Fourier Transform)</h3>
+            <p>Bell clangs have distinct frequency characteristics. The FFT converts time-domain audio signals into frequency-domain data, allowing us to analyze the spectral content.</p>
+            <div class="code-snippet">
+// Get frequency data
+const frequencyData = new Uint8Array(analyser.frequencyBinCount);
+analyser.getByteFrequencyData(frequencyData);
+// Bell frequencies typically range from 800Hz to 4000Hz
+            </div>
+            
+            <h3>3. Feature Extraction</h3>
+            <p>We extract key features that characterize bell sounds:</p>
+            <ul>
+                <li><strong>Spectral Centroid:</strong> The "center of mass" of the frequency spectrum</li>
+                <li><strong>High-Frequency Energy:</strong> Bells produce significant energy in high frequencies</li>
+                <li><strong>Spectral Rolloff:</strong> The frequency below which 85% of energy is contained</li>
+                <li><strong>Zero Crossing Rate:</strong> How often the signal crosses zero amplitude</li>
+            </ul>
+            
+            <h3>4. Bell Detection Algorithm</h3>
+            <p>Our algorithm combines multiple audio features to identify bell-like sounds:</p>
+            <div class="code-snippet">
+function detectBellClang(frequencyData) {
+    const spectralCentroid = calculateSpectralCentroid(frequencyData);
+    const highFreqEnergy = calculateHighFrequencyEnergy(frequencyData);
+    const spectralRolloff = calculateSpectralRolloff(frequencyData);
+    
+    // Bell characteristics: high spectral centroid, 
+    // significant high-frequency content
+    const bellScore = (spectralCentroid * 0.4) + 
+                     (highFreqEnergy * 0.6);
+    
+    return bellScore > threshold;
+}
+            </div>
+            
+            <h3>5. Real-time Processing Pipeline</h3>
+            <p>The system processes audio in small chunks (typically 20-50ms) to achieve real-time performance:</p>
+            <ol>
+                <li>Capture audio buffer</li>
+                <li>Apply windowing function</li>
+                <li>Perform FFT analysis</li>
+                <li>Extract audio features</li>
+                <li>Run classification algorithm</li>
+                <li>Update display and trigger alerts</li>
+            </ol>
+            
+            <h3>6. Machine Learning Concepts Applied</h3>
+            <p><strong>Feature Engineering:</strong> We manually craft features based on acoustic properties of bells.</p>
+            <p><strong>Classification:</strong> A simple threshold-based classifier determines if the current audio matches bell characteristics.</p>
+            <p><strong>Online Learning:</strong> The system can adapt to different environments through background noise calibration.</p>
+            
+            <h3>7. Practical Considerations for Bus Environment</h3>
+            <ul>
+                <li><strong>Noise Robustness:</strong> Background noise calibration helps filter out engine noise</li>
+                <li><strong>Low Latency:</strong> Quick response time is crucial for real-time alerts</li>
+                <li><strong>Power Efficiency:</strong> Optimized for mobile device battery life</li>
+                <li><strong>False Positive Reduction:</strong> Tuned to distinguish bells from similar sounds</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        class BellClangDetector {
+            constructor() {
+                this.audioContext = null;
+                this.microphone = null;
+                this.analyser = null;
+                this.dataArray = null;
+                this.isRunning = false;
+                this.detectionCount = 0;
+                this.backgroundNoise = 0;
+                this.threshold = 0.6;
+                this.lastDetectionTime = 0;
+                this.detectionCooldown = 1000; // 1 second cooldown
+                
+                this.initializeElements();
+                this.setupEventListeners();
+            }
+            
+            initializeElements() {
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.calibrateBtn = document.getElementById('calibrateBtn');
+                this.systemStatus = document.getElementById('systemStatus');
+                this.audioLevel = document.getElementById('audioLevel');
+                this.bellProbability = document.getElementById('bellProbability');
+                this.detectionCountEl = document.getElementById('detectionCount');
+                this.detectionAlert = document.getElementById('detectionAlert');
+                this.thresholdSlider = document.getElementById('thresholdSlider');
+                this.thresholdValue = document.getElementById('thresholdValue');
+                this.logContainer = document.getElementById('logContainer');
+                this.canvas = document.getElementById('waveform');
+                this.canvasCtx = this.canvas.getContext('2d');
+                
+                // Set canvas size
+                this.canvas.width = this.canvas.offsetWidth;
+                this.canvas.height = 150;
+            }
+            
+            setupEventListeners() {
+                this.startBtn.addEventListener('click', () => this.startDetection());
+                this.stopBtn.addEventListener('click', () => this.stopDetection());
+                this.calibrateBtn.addEventListener('click', () => this.calibrateBackground());
+                this.thresholdSlider.addEventListener('input', (e) => {
+                    this.threshold = parseFloat(e.target.value);
+                    this.thresholdValue.textContent = this.threshold;
+                });
+            }
+            
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+                logEntry.textContent = `[${timestamp}] ${message}`;
+                this.logContainer.appendChild(logEntry);
+                this.logContainer.scrollTop = this.logContainer.scrollHeight;
+            }
+            
+            async startDetection() {
+                try {
+                    this.log('Requesting microphone access...', 'info');
+                    
+                    // Initialize audio context
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Get microphone stream
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: false,
+                            noiseSuppression: false,
+                            autoGainControl: false
+                        } 
+                    });
+                    
+                    // Create audio nodes
+                    this.microphone = this.audioContext.createMediaStreamSource(stream);
+                    this.analyser = this.audioContext.createAnalyser();
+                    
+                    // Configure analyser
+                    this.analyser.fftSize = 2048;
+                    this.analyser.smoothingTimeConstant = 0.8;
+                    
+                    // Connect nodes
+                    this.microphone.connect(this.analyser);
+                    
+                    // Initialize data array
+                    this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+                    
+                    this.isRunning = true;
+                    this.startBtn.disabled = true;
+                    this.stopBtn.disabled = false;
+                    this.systemStatus.textContent = 'Active';
+                    this.systemStatus.style.color = '#2ed573';
+                    
+                    this.log('Detection started successfully!', 'success');
+                    
+                    // Start processing loop
+                    this.processAudio();
+                    
+                } catch (error) {
+                    this.log(`Error starting detection: ${error.message}`, 'error');
+                    console.error('Error accessing microphone:', error);
+                }
+            }
+            
+            stopDetection() {
+                this.isRunning = false;
+                
+                if (this.microphone) {
+                    this.microphone.disconnect();
+                }
+                
+                if (this.audioContext) {
+                    this.audioContext.close();
+                }
+                
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                this.systemStatus.textContent = 'Stopped';
+                this.systemStatus.style.color = '#ff4757';
+                
+                this.log('Detection stopped', 'info');
+            }
+            
+            calibrateBackground() {
+                if (!this.isRunning) {
+                    this.log('Please start detection first', 'error');
+                    return;
+                }
+                
+                this.log('Calibrating background noise...', 'info');
+                
+                // Sample background noise for 2 seconds
+                let samples = [];
+                const sampleDuration = 2000; // 2 seconds
+                const startTime = Date.now();
+                
+                const sampleBackground = () => {
+                    if (Date.now() - startTime < sampleDuration) {
+                        this.analyser.getByteFrequencyData(this.dataArray);
+                        const avgLevel = this.calculateAverageFrequency(this.dataArray);
+                        samples.push(avgLevel);
+                        setTimeout(sampleBackground, 50);
+                    } else {
+                        this.backgroundNoise = samples.reduce((sum, val) => sum + val, 0) / samples.length;
+                        this.log(`Background noise calibrated: ${this.backgroundNoise.toFixed(2)}`, 'success');
+                    }
+                };
+                
+                sampleBackground();
+            }
+            
+            processAudio() {
+                if (!this.isRunning) return;
+                
+                // Get frequency data
+                this.analyser.getByteFrequencyData(this.dataArray);
+                
+                // Calculate audio features
+                const audioLevel = this.calculateAverageFrequency(this.dataArray);
+                const spectralCentroid = this.calculateSpectralCentroid(this.dataArray);
+                const highFreqEnergy = this.calculateHighFrequencyEnergy(this.dataArray);
+                const spectralRolloff = this.calculateSpectralRolloff(this.dataArray);
+                
+                // Bell detection algorithm
+                const bellProbability = this.detectBellClang(this.dataArray);
+                
+                // Update display
+                this.audioLevel.textContent = `${(audioLevel - this.backgroundNoise).toFixed(1)} dB`;
+                this.bellProbability.textContent = `${(bellProbability * 100).toFixed(1)}%`;
+                
+                // Check for bell detection
+                const currentTime = Date.now();
+                if (bellProbability > this.threshold && 
+                    currentTime - this.lastDetectionTime > this.detectionCooldown) {
+                    
+                    this.triggerDetection(bellProbability);
+                    this.lastDetectionTime = currentTime;
+                }
+                
+                // Draw waveform
+                this.drawWaveform();
+                
+                // Continue processing
+                requestAnimationFrame(() => this.processAudio());
+            }
+            
+            calculateAverageFrequency(frequencyData) {
+                let sum = 0;
+                for (let i = 0; i < frequencyData.length; i++) {
+                    sum += frequencyData[i];
+                }
+                return sum / frequencyData.length;
+            }
+            
+            calculateSpectralCentroid(frequencyData) {
+                let numerator = 0;
+                let denominator = 0;
+                
+                for (let i = 0; i < frequencyData.length; i++) {
+                    const frequency = (i * this.audioContext.sampleRate) / (2 * frequencyData.length);
+                    numerator += frequency * frequencyData[i];
+                    denominator += frequencyData[i];
+                }
+                
+                return denominator > 0 ? numerator / denominator : 0;
+            }
+            
+            calculateHighFrequencyEnergy(frequencyData) {
+                // Focus on frequencies above 1000Hz (typical bell range)
+                const startBin = Math.floor((1000 * frequencyData.length * 2) / this.audioContext.sampleRate);
+                let energy = 0;
+                
+                for (let i = startBin; i < frequencyData.length; i++) {
+                    energy += frequencyData[i] * frequencyData[i];
+                }
+                
+                return Math.sqrt(energy / (frequencyData.length - startBin));
+            }
+            
+            calculateSpectralRolloff(frequencyData) {
+                const totalEnergy = frequencyData.reduce((sum, val) => sum + val * val, 0);
+                const targetEnergy = totalEnergy * 0.85;
+                
+                let cumulativeEnergy = 0;
+                for (let i = 0; i < frequencyData.length; i++) {
+                    cumulativeEnergy += frequencyData[i] * frequencyData[i];
+                    if (cumulativeEnergy >= targetEnergy) {
+                        return (i * this.audioContext.sampleRate) / (2 * frequencyData.length);
+                    }
+                }
+                
+                return this.audioContext.sampleRate / 2;
+            }
+            
+            detectBellClang(frequencyData) {
+                // Multi-feature bell detection algorithm
+                const spectralCentroid = this.calculateSpectralCentroid(frequencyData);
+                const highFreqEnergy = this.calculateHighFrequencyEnergy(frequencyData);
+                const avgLevel = this.calculateAverageFrequency(frequencyData);
+                
+                // Normalize features
+                const normalizedCentroid = Math.min(spectralCentroid / 3000, 1); // Normalize to 3kHz
+                const normalizedHighFreq = Math.min(highFreqEnergy / 100, 1);
+                const normalizedLevel = Math.min((avgLevel - this.backgroundNoise) / 50, 1);
+                
+                // Bell scoring algorithm
+                // Bells typically have:
+                // - High spectral centroid (bright sound)
+                // - Significant high-frequency content
+                // - Sharp attack (sudden amplitude increase)
+                let bellScore = 0;
+                
+                if (normalizedCentroid > 0.3) bellScore += 0.3;
+                if (normalizedHighFreq > 0.4) bellScore += 0.4;
+                if (normalizedLevel > 0.3) bellScore += 0.3;
+                
+                // Additional check for metallic resonance (simplified)
+                const resonanceCheck = this.checkMetallicResonance(frequencyData);
+                if (resonanceCheck) bellScore += 0.2;
+                
+                return Math.min(bellScore, 1.0);
+            }
+            
+            checkMetallicResonance(frequencyData) {
+                // Look for harmonic patterns typical of metallic sounds
+                // This is a simplified version - a real implementation would be more sophisticated
+                const fundamentalRange = [800, 1200]; // Hz
+                const startBin = Math.floor((fundamentalRange[0] * frequencyData.length * 2) / this.audioContext.sampleRate);
+                const endBin = Math.floor((fundamentalRange[1] * frequencyData.length * 2) / this.audioContext.sampleRate);
+                
+                let peakCount = 0;
+                for (let i = startBin; i < endBin; i++) {
+                    if (frequencyData[i] > frequencyData[i-1] && frequencyData[i] > frequencyData[i+1] && frequencyData[i] > 50) {
+                        peakCount++;
+                    }
+                }
+                
+                return peakCount >= 2; // Multiple harmonic peaks suggest metallic resonance
+            }
+            
+            triggerDetection(probability) {
+                this.detectionCount++;
+                this.detectionCountEl.textContent = this.detectionCount;
+                
+                // Show alert
+                this.detectionAlert.style.display = 'block';
+                setTimeout(() => {
+                    this.detectionAlert.style.display = 'none';
+                }, 2000);
+                
+                // Log detection
+                this.log(`Bell detected! Confidence: ${(probability * 100).toFixed(1)}%`, 'detection');
+                
+                // Optional: Play notification sound or vibrate (if supported)
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                }
+            }
+            
+            drawWaveform() {
+                const width = this.canvas.width;
+                const height = this.canvas.height;
+                
+                this.canvasCtx.fillStyle = '#1a1a1a';
+                this.canvasCtx.fillRect(0, 0, width, height);
+                
+                this.canvasCtx.lineWidth = 2;
+                this.canvasCtx.strokeStyle = '#ffd700';
+                this.canvasCtx.beginPath();
+                
+                const sliceWidth = width / this.dataArray.length;
+                let x = 0;
+                
+                for (let i = 0; i < this.dataArray.length; i++) {
+                    const v = this.dataArray[i] / 128.0;
+                    const y = v * height / 2;
+                    
+                    if (i === 0) {
+                        this.canvasCtx.moveTo(x, y);
+                    } else {
+                        this.canvasCtx.lineTo(x, y);
+                    }
+                    
+                    x += sliceWidth;
+                }
+                
+                this.canvasCtx.lineTo(width, height / 2);
+                this.canvasCtx.stroke();
+            }
+        }
+        
+        // Initialize the detector when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const detector = new BellClangDetector();
+        });
+    </script>
+</body>
+</html>
