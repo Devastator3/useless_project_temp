@@ -19,15 +19,15 @@
 [To know when the bell rings]
 
 ### The Solution (that nobody asked for)
-[Using code]
+[A website that tracks the bells]
 
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- [Languages used]
+- [Pyhton,JS,Json]
 - [Frameworks used]
 - [Libraries used]
-- [Tools used]
+- [CHATGPT, CLUDE AI]
 
 For Hardware:
 - [List main components]
@@ -46,13 +46,13 @@ For Software:
 For Software:
 
 # Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
+![Screenshot1](Screenshot 2025-08-02 161258.png)
 *Add caption explaining what this shows*
 
-![Screenshot2](Add screenshot 2 here with proper name)
+![Screenshot2](Screenshot 2025-08-02 161309.png)
 *Add caption explaining what this shows*
 
-![Screenshot3](Add screenshot 3 here with proper name)
+![Screenshot3](Screenshot 2025-08-02 161320.png)
 *Add caption explaining what this shows*
 
 # Diagrams
