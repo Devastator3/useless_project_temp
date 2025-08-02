@@ -52,7 +52,7 @@ For Software:
 ![Screenshot2]([Screenshot 2025-08-02 161309.png](https://github.com/Devastator3/useless_project_temp/blob/main/Screenshot%202025-08-02%20161309.png))
 *Add caption explaining what this shows*
 
-![Screenshot3](Screenshot 2025-08-02 161320.png)
+![Screenshot3]([Screenshot 2025-08-02 161320.png](https://github.com/Devastator3/useless_project_temp/blob/main/Screenshot%202025-08-02%20161320.png))
 *Add caption explaining what this shows*
 
 # Diagrams
